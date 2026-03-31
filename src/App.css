@@ -324,6 +324,12 @@
   font-size: 0.82rem;
 }
 
+.legend-count {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
 .legend-desc {
   color: var(--muted);
   font-size: 0.75rem;

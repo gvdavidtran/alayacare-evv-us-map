@@ -7,6 +7,7 @@ import { useEvvOverrides } from '../context/EvvOverridesContext'
 import {
   computeMapBucket,
   getStateEvv,
+  GUIDE_ROLLUP_BUCKET_COUNTS,
   LEGEND_ITEMS,
   rollupLabel,
 } from '../data/evvByState'
@@ -366,7 +367,17 @@ export function UsEvvMap({ variant = 'default' }: { variant?: UsEvvMapVariant })
                 aria-hidden
               />
               <div>
-                <div className="legend-label">{item.label}</div>
+                <div className="legend-label">
+                  {item.label}
+                  <span className="legend-count">
+                    {' '}
+                    ({GUIDE_ROLLUP_BUCKET_COUNTS[item.bucket]}{' '}
+                    {GUIDE_ROLLUP_BUCKET_COUNTS[item.bucket] === 1
+                      ? 'state'
+                      : 'states'}
+                    )
+                  </span>
+                </div>
                 <div className="legend-desc">{item.description}</div>
               </div>
             </li>
@@ -378,7 +389,17 @@ export function UsEvvMap({ variant = 'default' }: { variant?: UsEvvMapVariant })
               aria-hidden
             />
             <div>
-              <div className="legend-label">No data</div>
+              <div className="legend-label">
+                No data
+                <span className="legend-count">
+                  {' '}
+                  ({GUIDE_ROLLUP_BUCKET_COUNTS.unknown}{' '}
+                  {GUIDE_ROLLUP_BUCKET_COUNTS.unknown === 1
+                    ? 'state'
+                    : 'states'}
+                  )
+                </span>
+              </div>
               <div className="legend-desc">
                 Not listed in the guide (should not appear for 50 states + DC).
               </div>

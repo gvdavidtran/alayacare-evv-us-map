@@ -751,6 +751,23 @@ const STATES: StateEvv[] = [
   },
 ]
 
+/** Count of guide jurisdictions (50 states + DC) per rollup map bucket from {@link computeMapBucket}. */
+export const GUIDE_ROLLUP_BUCKET_COUNTS: Record<MapBucket, number> = (() => {
+  const counts: Record<MapBucket, number> = {
+    in_production: 0,
+    in_production_partial: 0,
+    in_development: 0,
+    needs_certification: 0,
+    sponsored: 0,
+    closed: 0,
+    unknown: 0,
+  }
+  for (const s of STATES) {
+    counts[computeMapBucket(s.rows)]++
+  }
+  return counts
+})()
+
 export const EVV_BY_CODE: Record<string, StateEvv> = Object.fromEntries(
   STATES.map((s) => [s.code, s])
 )
