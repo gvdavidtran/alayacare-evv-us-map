@@ -10,15 +10,30 @@ import {
   LEGEND_ITEMS,
   rollupLabel,
 } from '../data/evvByState'
+import {
+  CHIP_H,
+  CHIP_RX,
+  CHIP_W,
+  EAST_COAST_CHIP_STATES,
+  EAST_COAST_CHIP_SET,
+  EAST_COAST_LABEL_POSITIONS,
+} from '../data/mapEastCoastLabelChips'
 import type { EvvStatus, MapBucket, StateEvv } from '../data/evvTypes'
 import {
   displayBucketForState,
   getUserOverride,
   type UserOverridesMap,
 } from '../data/evvUserOverrides'
-import { MAP_BADGE_FOREGROUND, MAP_FILL, hoverFill } from '../mapColors'
+import {
+  MAP_BADGE_FOREGROUND,
+  MAP_CHIP_TEXT_STROKE,
+  MAP_FILL,
+  hoverFill,
+} from '../mapColors'
 
 const MAP_SR_HINT_ID = 'evv-map-sr-instructions'
+
+export type UsEvvMapVariant = 'default' | 'beta'
 
 /**
  * When `customStates` is set, usa-map-react uses each state's own `label` config only;
@@ -39,6 +54,104 @@ function makeStateLabelRender(overrides: UserOverridesMap) {
       </Fragment>
     )
   }
+}
+
+function EastCoastLabelChipsOverlay({
+  overrides,
+  hoverCode,
+  setHoverCode,
+  onChipClick,
+}: {
+  overrides: UserOverridesMap
+  hoverCode: string | null
+  setHoverCode: (code: string | null) => void
+  onChipClick: (abbr: USAStateAbbreviation) => void
+}) {
+  const [tip, setTip] = useState<{ x: number; y: number; code: string } | null>(
+    null
+  )
+
+  return (
+    <>
+      <svg
+        className="map-beta-overlay"
+        viewBox="0 0 959 593"
+        preserveAspectRatio="xMidYMid meet"
+        aria-hidden
+      >
+        {EAST_COAST_CHIP_STATES.map((code) => {
+          const abbr = code as USAStateAbbreviation
+          const pos = EAST_COAST_LABEL_POSITIONS[code]
+          const bucket = displayBucketForState(code, overrides)
+          const active = hoverCode === code
+          const fill = active ? hoverFill(bucket) : MAP_FILL[bucket]
+          const fg = MAP_BADGE_FOREGROUND[bucket]
+          const chipStroke = MAP_CHIP_TEXT_STROKE[bucket]
+          const evv = getStateEvv(code)
+          const name = evv?.name ?? code
+          const status = rollupLabel(bucket)
+          return (
+            <g key={code} transform={`translate(${pos.x},${pos.y})`}>
+              <title>{`${name} (${code}). ${status}. Activate for details.`}</title>
+              <rect
+                className="map-beta-chip-hit"
+                x={-CHIP_W / 2}
+                y={-CHIP_H / 2}
+                width={CHIP_W}
+                height={CHIP_H}
+                rx={CHIP_RX}
+                fill={fill}
+                stroke="#0f172a"
+                strokeWidth={1}
+                tabIndex={0}
+                onMouseEnter={(e) => {
+                  setHoverCode(code)
+                  setTip({ x: e.clientX, y: e.clientY, code })
+                }}
+                onMouseMove={(e) => {
+                  setTip({ x: e.clientX, y: e.clientY, code })
+                }}
+                onMouseLeave={() => {
+                  setHoverCode(null)
+                  setTip(null)
+                }}
+                onClick={() => onChipClick(abbr)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onChipClick(abbr)
+                  }
+                }}
+              />
+              <text
+                className="map-beta-chip-text"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={fg}
+                stroke={chipStroke}
+                strokeWidth={3.25}
+                paintOrder="stroke fill"
+              >
+                {code}
+              </text>
+            </g>
+          )
+        })}
+      </svg>
+      {tip ? (
+        <div
+          className="map-beta-floating-tooltip"
+          style={{ left: tip.x + 12, top: tip.y + 12 }}
+        >
+          <span className="map-tooltip-inner">
+            <strong>{getStateEvv(tip.code)?.name ?? tip.code}</strong>
+            <br />
+            {rollupLabel(displayBucketForState(tip.code, overrides))}
+          </span>
+        </div>
+      ) : null}
+    </>
+  )
 }
 
 function statusLabel(status: EvvStatus): string {
@@ -159,7 +272,7 @@ function DetailPanel({
   )
 }
 
-export function UsEvvMap() {
+export function UsEvvMap({ variant = 'default' }: { variant?: UsEvvMapVariant }) {
   const { overrides } = useEvvOverrides()
   const [hoverCode, setHoverCode] = useState<string | null>(null)
   const [pinnedCode, setPinnedCode] = useState<string | null>(null)
@@ -186,7 +299,13 @@ export function UsEvvMap() {
     const labelRender = makeStateLabelRender(overrides)
     const states: NonNullable<Parameters<typeof USAMap>[0]['customStates']> =
       {}
+    const hideBuiltinLabel =
+      variant === 'beta'
+        ? (code: string) => EAST_COAST_CHIP_SET.has(code)
+        : () => false
+
     for (const abbr of StateAbbreviations as USAStateAbbreviation[]) {
+      const code = abbr as string
       const bucket = displayBucketForState(abbr, overrides)
       const base = MAP_FILL[bucket]
       const fill = hoverCode === abbr ? hoverFill(bucket) : base
@@ -195,10 +314,12 @@ export function UsEvvMap() {
       states[abbr] = {
         fill,
         stroke: '#0f172a',
-        label: {
-          enabled: true,
-          render: labelRender,
-        },
+        label: hideBuiltinLabel(code)
+          ? { enabled: false }
+          : {
+              enabled: true,
+              render: labelRender,
+            },
         onHover: () => setHoverCode(abbr),
         onLeave: () => setHoverCode(null),
         onClick: () => {
@@ -217,7 +338,7 @@ export function UsEvvMap() {
       }
     }
     return states
-  }, [hoverCode, handleStateClick, overrides])
+  }, [hoverCode, handleStateClick, overrides, variant])
 
   const legend = useMemo(
     () => (
@@ -227,6 +348,14 @@ export function UsEvvMap() {
           Colors follow the &ldquo;State EVV Status&rdquo; definitions in the
           Ultimate Guide to EVV (unless you set a custom map status on the Edit
           tab). Mixed guide rows use the amber band.
+          {variant === 'beta' ? (
+            <>
+              {' '}
+              On this beta map, crowded Northeast and mid-Atlantic states use
+              separate hoverable label chips in a column along the right edge of the
+              map (similar to classic US map layouts).
+            </>
+          ) : null}
         </p>
         <ul className="legend-list legend-grid">
           {LEGEND_ITEMS.map((item) => (
@@ -258,24 +387,29 @@ export function UsEvvMap() {
         </ul>
       </div>
     ),
-    []
+    [variant]
   )
 
-  return (
-    <div className="map-layout map-layout-stacked">
-      <div className="map-and-details">
-        <div
-          className="map-wrap map-wrap-full map-wrap-a11y"
-          role="region"
-          aria-label="United States EVV status map"
-          aria-describedby={MAP_SR_HINT_ID}
-        >
-          <p id={MAP_SR_HINT_ID} className="sr-only">
+  const mapBlock = (
+    <>
+      <p id={MAP_SR_HINT_ID} className="sr-only">
+        {variant === 'beta' ? (
+          <>
+            Most states show a two-letter abbreviation on the map.             Several Northeast and mid-Atlantic states use separate chips in a column
+            on the right — hover or activate them for details. Full names and
+            EVV status are also in the details panel and the summary table below.
+          </>
+        ) : (
+          <>
             Each state shows a two-letter postal abbreviation. Full state name and
             rolled-up EVV status are available as a screen reader label on each
             abbreviation. Hover or click a state to open details in the panel beside
             the map, or use the state summary table below for a full list.
-          </p>
+          </>
+        )}
+      </p>
+      {variant === 'beta' ? (
+        <div className="map-beta-stack">
           <USAMap
             defaultState={{
               stroke: '#0f172a',
@@ -290,6 +424,42 @@ export function UsEvvMap() {
             }}
             className="usa-map-evv"
           />
+          <EastCoastLabelChipsOverlay
+            overrides={overrides}
+            hoverCode={hoverCode}
+            setHoverCode={setHoverCode}
+            onChipClick={handleStateClick}
+          />
+        </div>
+      ) : (
+        <USAMap
+          defaultState={{
+            stroke: '#0f172a',
+            label: { enabled: true },
+            tooltip: { enabled: false },
+          }}
+          customStates={customStates}
+          mapSettings={{
+            width: '100%',
+            height: 'auto',
+            title: 'United States map colored by AlayaCare EVV status per state',
+          }}
+          className="usa-map-evv"
+        />
+      )}
+    </>
+  )
+
+  return (
+    <div className="map-layout map-layout-stacked">
+      <div className="map-and-details">
+        <div
+          className="map-wrap map-wrap-full map-wrap-a11y"
+          role="region"
+          aria-label="United States EVV status map"
+          aria-describedby={MAP_SR_HINT_ID}
+        >
+          {mapBlock}
         </div>
         <DetailPanel
           state={activeState}

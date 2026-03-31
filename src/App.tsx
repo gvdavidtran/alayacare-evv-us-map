@@ -5,7 +5,7 @@ import { UsEvvMap } from './components/UsEvvMap'
 import { EVV_CONFLUENCE_URL, EVV_LAST_UPDATED } from './data/evvByState'
 import './App.css'
 
-type MainTab = 'map' | 'edit'
+type MainTab = 'map' | 'map-beta' | 'edit'
 
 function App() {
   const [tab, setTab] = useState<MainTab>('map')
@@ -50,6 +50,18 @@ function App() {
             <button
               type="button"
               role="tab"
+              id="tab-map-beta"
+              aria-selected={tab === 'map-beta'}
+              aria-controls="panel-map-beta"
+              tabIndex={tab === 'map-beta' ? 0 : -1}
+              className={`app-tab ${tab === 'map-beta' ? 'app-tab-active' : ''}`}
+              onClick={() => setTab('map-beta')}
+            >
+              Map (beta)
+            </button>
+            <button
+              type="button"
+              role="tab"
               id="tab-edit"
               aria-selected={tab === 'edit'}
               aria-controls="panel-edit"
@@ -71,6 +83,16 @@ function App() {
             className="app-tab-panel"
           >
             <UsEvvMap />
+            <EvvStateSummaryTable />
+          </div>
+        ) : tab === 'map-beta' ? (
+          <div
+            id="panel-map-beta"
+            role="tabpanel"
+            aria-labelledby="tab-map-beta"
+            className="app-tab-panel"
+          >
+            <UsEvvMap variant="beta" />
             <EvvStateSummaryTable />
           </div>
         ) : (

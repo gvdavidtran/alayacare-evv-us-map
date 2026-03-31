@@ -35,6 +35,20 @@ export const MAP_BADGE_FOREGROUND: Record<MapBucket, string> = {
   unknown: '#3d3a26',
 }
 
+/**
+ * Halo stroke for beta map chip abbreviations on colored pills (not the light detail panel).
+ * Light text gets a dark outline; dark text gets a light outline — avoids white-on-white halos.
+ */
+export const MAP_CHIP_TEXT_STROKE: Record<MapBucket, string> = {
+  in_production: 'rgba(15, 23, 42, 0.55)',
+  in_production_partial: 'rgba(255, 255, 255, 0.92)',
+  in_development: 'rgba(255, 255, 255, 0.92)',
+  needs_certification: 'rgba(15, 23, 42, 0.45)',
+  sponsored: 'rgba(255, 255, 255, 0.9)',
+  closed: 'rgba(255, 255, 255, 0.78)',
+  unknown: 'rgba(255, 255, 255, 0.9)',
+}
+
 export function hoverFill(bucket: MapBucket): string {
   switch (bucket) {
     case 'in_production':

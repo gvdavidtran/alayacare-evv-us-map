@@ -124,6 +124,78 @@
   display: block;
 }
 
+/* Beta map: stack overlay SVG on top of USAMap (same aspect as viewBox 959×593) */
+.map-beta-stack {
+  position: relative;
+  width: 100%;
+}
+
+.map-beta-stack .usa-map-evv {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.map-beta-stack .map-beta-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.map-beta-stack .map-beta-chip-hit {
+  pointer-events: auto;
+  cursor: pointer;
+  outline: none;
+}
+
+.map-beta-stack .map-beta-chip-hit:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+.map-beta-stack .map-beta-chip-text {
+  pointer-events: none;
+  font-size: 14px;
+  font-weight: 700;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  letter-spacing: 0.06em;
+  text-rendering: geometricPrecision;
+  /* stroke: per-bucket SVG attributes on each chip (mapColors MAP_CHIP_TEXT_STROKE) */
+}
+
+.map-beta-floating-tooltip {
+  position: fixed;
+  z-index: 1000;
+  max-width: 220px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .map-beta-floating-tooltip {
+    color: var(--text);
+    background-color: var(--surface);
+    border-color: var(--border);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+}
+
 /* State abbreviations on the SVG: contrast on any fill (stroke under fill) */
 .map-wrap-full .usa-map-evv .state-label {
   font-size: 16px;
