@@ -5,10 +5,10 @@ import { UsEvvMap } from './components/UsEvvMap'
 import { EVV_CONFLUENCE_URL, EVV_LAST_UPDATED } from './data/evvByState'
 import './App.css'
 
-type MainTab = 'map' | 'map-beta' | 'edit'
+type MainTab = 'map-beta' | 'edit'
 
 function App() {
-  const [tab, setTab] = useState<MainTab>('map')
+  const [tab, setTab] = useState<MainTab>('map-beta')
 
   return (
     <div className="app">
@@ -38,18 +38,6 @@ function App() {
             <button
               type="button"
               role="tab"
-              id="tab-map"
-              aria-selected={tab === 'map'}
-              aria-controls="panel-map"
-              tabIndex={tab === 'map' ? 0 : -1}
-              className={`app-tab ${tab === 'map' ? 'app-tab-active' : ''}`}
-              onClick={() => setTab('map')}
-            >
-              Map &amp; summary
-            </button>
-            <button
-              type="button"
-              role="tab"
               id="tab-map-beta"
               aria-selected={tab === 'map-beta'}
               aria-controls="panel-map-beta"
@@ -57,7 +45,7 @@ function App() {
               className={`app-tab ${tab === 'map-beta' ? 'app-tab-active' : ''}`}
               onClick={() => setTab('map-beta')}
             >
-              Map (beta)
+              Map &amp; Summary
             </button>
             <button
               type="button"
@@ -69,23 +57,13 @@ function App() {
               className={`app-tab ${tab === 'edit' ? 'app-tab-active' : ''}`}
               onClick={() => setTab('edit')}
             >
-              Edit states
+              Edit States (beta)
             </button>
           </nav>
         </div>
       </div>
       <main className="app-main">
-        {tab === 'map' ? (
-          <div
-            id="panel-map"
-            role="tabpanel"
-            aria-labelledby="tab-map"
-            className="app-tab-panel"
-          >
-            <UsEvvMap />
-            <EvvStateSummaryTable />
-          </div>
-        ) : tab === 'map-beta' ? (
+        {tab === 'map-beta' ? (
           <div
             id="panel-map-beta"
             role="tabpanel"
@@ -110,7 +88,7 @@ function App() {
         <p>
           Internal reference only. Guide data:{' '}
           <code className="inline-code">src/data/evvByState.ts</code>. Local edits
-          use browser storage — see the Edit states tab.
+          use browser storage — see the Edit States (beta) tab.
         </p>
       </footer>
     </div>

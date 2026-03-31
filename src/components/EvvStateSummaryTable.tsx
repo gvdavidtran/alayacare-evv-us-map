@@ -38,7 +38,7 @@ export function EvvStateSummaryTable() {
       <p className="evv-table-intro">
         Same data as the map, sorted alphabetically. <strong>Map status</strong>{' '}
         is the color on the map (guide rollup or your override from the Edit
-        tab). Paths list each aggregator line from the EVV guide.
+        States (beta) tab). Paths list each aggregator line from the EVV guide.
       </p>
       <div className="evv-table-scroll">
         <table className="evv-summary-table">

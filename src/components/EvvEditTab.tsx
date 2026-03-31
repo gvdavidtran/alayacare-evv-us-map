@@ -46,7 +46,7 @@ export function EvvEditTab() {
       <div className="evv-edit-header">
         <div>
           <h2 id="evv-edit-heading" className="evv-edit-title">
-            Edit states
+            Edit States (beta)
           </h2>
           <p className="evv-edit-intro">
             Override the rolled-up map color per state, and add local notes and

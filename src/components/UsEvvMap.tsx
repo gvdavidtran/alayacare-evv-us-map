@@ -347,7 +347,7 @@ export function UsEvvMap({ variant = 'default' }: { variant?: UsEvvMapVariant })
         <p className="legend-intro">
           Colors follow the &ldquo;State EVV Status&rdquo; definitions in the
           Ultimate Guide to EVV (unless you set a custom map status on the Edit
-          tab). Mixed guide rows use the amber band.
+          States (beta) tab). Mixed guide rows use the amber band.
           {variant === 'beta' ? (
             <>
               {' '}
